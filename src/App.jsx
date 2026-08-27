@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ModalNuevoProducto from "./components/ModalNuevoProducto.jsx";
-import ModalConfirmacion from "./components/ModalConfirmacion.jsx"; // 👈 Importamos el modal de confirmación
+import ModalConfirmacion from "./components/ModalConfirmacion.jsx";
+import './components/styles/PanelStyles.css';
 
 const PRODUCTOS_INICIALES = [
   {
@@ -13,13 +14,20 @@ const PRODUCTOS_INICIALES = [
         id: "f1",
         nombre: "Factura con crema",
         precio: 450,
-        img: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=100&auto=format&fit=crop&q=60",
+        img: "/facturaConCrema.png",
       },
       {
         id: "f2",
         nombre: "Medialuna",
         precio: 400,
-        img: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=100&auto=format&fit=crop&q=60",
+        img: "/mediaLuna.png",
+      },
+      {
+        id: "f3",
+        nombre: "Con dulce de leche",
+        precio: 500,
+        img: "/conDulceDeLeche.png"
+        ,
       },
     ],
   },
@@ -33,19 +41,31 @@ const PRODUCTOS_INICIALES = [
         id: "t1",
         nombre: "Tortilla Finita",
         precio: 150,
-        img: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=100&auto=format&fit=crop&q=60",
+        img: "/tortillasFinitas.png",
       },
       {
         id: "t2",
         nombre: "Tortilla Gruesa",
         precio: 200,
-        img: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=100&auto=format&fit=crop&q=60",
+        img: "/tortillasGruesas.png",
       },
       {
         id: "t3",
         nombre: "Bollitos",
         precio: 120,
-        img: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=100&auto=format&fit=crop&q=60",
+        img: "/bollitos.png",
+      },
+      {
+        id: "t4",
+        nombre: "Cremonas",
+        precio: 120,
+        img: "/cremonas.png",
+      },
+      {
+        id: "t5",
+        nombre: "Cuernitos",
+        precio: 120,
+        img: "/cuernitos.png",
       },
     ],
   },
@@ -54,24 +74,24 @@ const PRODUCTOS_INICIALES = [
     nombre: "Pan",
     precio: 3000,
     tipo: "dinero",
-    variedades: [
+      variedades: [
       {
         id: "p1",
         nombre: "Pan Francés",
         precio: 3000,
-        img: "https://images.unsplash.com/photo-1589367920969-ab8e050bbb04?w=100&auto=format&fit=crop&q=60",
+        img: "/panFrances.png",
       },
       {
         id: "p2",
         nombre: "Pan Mignon",
         precio: 3200,
-        img: "https://images.unsplash.com/photo-1549931319-a545dcf3bc73?w=100&auto=format&fit=crop&q=60",
+        img: "/panMignon.png",
       },
       {
         id: "p3",
         nombre: "Pan Sanguchero",
         precio: 3000,
-        img: "https://images.unsplash.com/photo-1589367920969-ab8e050bbb04?w=100&auto=format&fit=crop&q=60",
+        img: "/panFrances.png",
       },
     ],
   },
@@ -102,8 +122,9 @@ export default function App() {
 
   // Estados de Modales
   const [mostrarModalNuevo, setMostrarModalNuevo] = useState(false);
-  const [productoAEliminar, setProductoAEliminar] = useState(null); // Guarda { id, nombre }
+  const [productoAEliminar, setProductoAEliminar] = useState(null);
   const [confirmarVaciarCarrito, setConfirmarVaciarCarrito] = useState(false);
+  const [confirmarCompra, setConfirmarCompra] = useState(false);
 
   // Agregar producto desde el modal
   const handleAgregarProducto = (nuevoProducto) => {
@@ -207,12 +228,6 @@ export default function App() {
     setConfirmarVaciarCarrito(false);
   };
 
-  const finalizarVenta = () => {
-    if (totalGeneral === 0) return alert("El carrito está vacío");
-    alert(`¡Venta registrada con éxito por un total de $${totalGeneral}!`);
-    setCarrito({});
-  };
-
   const tomarFotoParaVariedad = (e) => {
     const file = e.target.files[0];
     if (!file || !variedadSeleccionada) return;
@@ -246,11 +261,13 @@ export default function App() {
     reader.readAsDataURL(file);
   };
 
+  const carritoVacio = Object.keys(carrito).length === 0;
+
   return (
-    <div style={styles.pantallaPrincipal}>
+    <div className="pantalla-principal">
       {/* SECCIÓN IZQUIERDA: PRODUCTOS */}
-      <div style={styles.seccionProductos}>
-        <h2 style={styles.tituloSeccion}>Productos</h2>
+      <div className="seccion-productos">
+        <h2 className="titulo-seccion">Productos</h2>
 
         {/* Botón que abre el Modal de Creación */}
         <div className="card mb-3 shadow-sm border-info">
@@ -266,19 +283,19 @@ export default function App() {
         </div>
 
         {/* Grilla de Cards */}
-        <div style={styles.grilla}>
+        <div className="grilla">
           {productos.map((producto) => {
             const estaAbierta = categoriaAbierta === producto.id;
 
             return (
-              <div key={producto.id} style={styles.card}>
-                <div style={styles.encabezadoCard}>
+              <div key={producto.id} className="card">
+                <div className="encabezado-card">
                   <span
                     onClick={() => {
                       setCategoriaAbierta(estaAbierta ? null : producto.id);
                       setVariedadSeleccionada(null);
                     }}
-                    style={styles.nombreProductoClickable}
+                    className="nombre-producto-clickable"
                   >
                     {producto.nombre} {estaAbierta ? "▲" : "▼"}
                   </span>
@@ -291,10 +308,9 @@ export default function App() {
                       onChange={(e) =>
                         cambiarPrecioProducto(producto.id, Number(e.target.value))
                       }
-                      style={styles.inputPrecio}
+                      className="input-precio"
                       title="Editar precio base"
                     />
-                    {/* Botón para abrir modal de confirmación de eliminación */}
                     <button
                       onClick={() =>
                         setProductoAEliminar({
@@ -313,8 +329,8 @@ export default function App() {
 
                 {/* Subvariedades desplegables */}
                 {estaAbierta && (
-                  <div style={styles.desgloseVariedades}>
-                    <div style={styles.listaVariedades}>
+                  <div className="desglose-variedades">
+                    <div className="lista-variedades">
                       {producto.variedades &&
                         producto.variedades.map((v) => {
                           const precioVariedad = v.precio ?? producto.precio;
@@ -330,16 +346,16 @@ export default function App() {
                                   producto,
                                 })
                               }
+                              className="item-variedad"
                               style={{
-                                ...styles.itemVariedad,
                                 backgroundColor: esSeleccionada ? "#e0f2fe" : "#fff",
                                 border: esSeleccionada
                                   ? "1px solid #0288d1"
                                   : "1px solid #e0e0e0",
                               }}
                             >
-                              <img src={v.img} alt={v.nombre} style={styles.miniImg} />
-                              <span style={styles.textoVariedad}>{v.nombre}</span>
+                              <img src={v.img} alt={v.nombre} className="mini-img" />
+                              <span className="texto-variedad">{v.nombre}</span>
 
                               <div
                                 className="ms-auto d-flex align-items-center gap-1"
@@ -356,7 +372,7 @@ export default function App() {
                                       Number(e.target.value)
                                     )
                                   }
-                                  style={styles.inputPrecioVariedad}
+                                  className="input-precio-variedad"
                                   title="Editar precio variedad"
                                 />
                               </div>
@@ -365,17 +381,17 @@ export default function App() {
                         })}
                     </div>
 
-                    <div style={styles.formNuevaVariedad}>
+                    <div className="form-nueva-variedad">
                       <input
                         type="text"
                         placeholder="Nueva variedad..."
                         value={nuevaVariedadNombre}
                         onChange={(e) => setNuevaVariedadNombre(e.target.value)}
-                        style={styles.inputNuevaVariedad}
+                        className="input-nueva-variedad"
                       />
                       <button
                         onClick={() => agregarNuevaVariedad(producto.id)}
-                        style={styles.btnAgregarVariedad}
+                        className="btn-agregar-variedad"
                       >
                         +
                       </button>
@@ -385,22 +401,22 @@ export default function App() {
 
                 {/* Botonera de compra rápida */}
                 {producto.tipo === "dinero" ? (
-                  <div style={styles.contenedorMultiplos}>
+                  <div className="contenedor-multiplos">
                     <button
                       onClick={() => agregarAlCarrito(producto, 50)}
-                      style={styles.btnMultiplo}
+                      className="btn-multiplo"
                     >
                       +$50
                     </button>
                     <button
                       onClick={() => agregarAlCarrito(producto, 100)}
-                      style={styles.btnMultiplo}
+                      className="btn-multiplo"
                     >
                       +$100
                     </button>
                     <button
                       onClick={() => agregarAlCarrito(producto, 500)}
-                      style={styles.btnMultiplo}
+                      className="btn-multiplo"
                     >
                       +$500
                     </button>
@@ -408,7 +424,7 @@ export default function App() {
                 ) : (
                   <button
                     onClick={() => agregarAlCarrito(producto, producto.precio)}
-                    style={styles.btnAgregarUnidad}
+                    className="btn-agregar-unidad"
                   >
                     +1 {producto.nombre} (${producto.precio})
                   </button>
@@ -420,7 +436,7 @@ export default function App() {
       </div>
 
       {/* SECCIÓN CENTRAL: VISTA PREVIA Y FOTO */}
-      <div style={styles.seccionAccionRapida}>
+      <div className="seccion-accion-rapida">
         <input
           id="input-camara"
           type="file"
@@ -430,13 +446,13 @@ export default function App() {
           onChange={tomarFotoParaVariedad}
         />
 
-        <label htmlFor="input-camara" style={styles.btnCamara}>
+        <label htmlFor="input-camara" className="btn-camara">
           📷 Tomar nueva foto
         </label>
-        <h2 style={styles.tituloSeccion}>Variedad Seleccionada</h2>
+        <h2 className="titulo-seccion">Variedad Seleccionada</h2>
         {variedadSeleccionada ? (
-          <div style={styles.contenedorTarget}>
-            <p style={styles.subtituloClick}>
+          <div className="contenedor-target">
+            <p className="subtitulo-click">
               ¡Hacé clic en la foto para sumar 1 unidad!
             </p>
             <div
@@ -447,40 +463,40 @@ export default function App() {
                   variedadSeleccionada.nombre
                 )
               }
-              style={styles.cardImagenGrande}
+              className="card-imagen-grande"
             >
               <img
                 src={variedadSeleccionada.img}
                 alt={variedadSeleccionada.nombre}
-                style={styles.imagenGrande}
+                className="imagen-grande"
               />
-              <span style={styles.badgePrecio}>
+              <span className="badge-precio">
                 +1 (${variedadSeleccionada.precio})
               </span>
             </div>
-            <h3 style={styles.nombreSeleccionado}>
+            <h3 className="nombre-seleccionado">
               {variedadSeleccionada.nombre}
             </h3>
-            <span style={styles.tagCategoria}>
+            <span className="tag-categoria">
               {variedadSeleccionada.producto.nombre}
             </span>
           </div>
         ) : (
-          <p style={styles.textoVacio}>
+          <p className="texto-vacio">
             Seleccioná una variedad de la lista para sumar por foto.
           </p>
         )}
       </div>
 
       {/* SECCIÓN DERECHA: RESUMEN DE COMPRA */}
-      <div style={styles.seccionResumen}>
-        <h2 style={styles.tituloSeccion}>Venta Actual</h2>
-        <div style={styles.listaCarrito}>
-          {Object.keys(carrito).length === 0 ? (
-            <p style={styles.textoVacio}>No hay productos seleccionados</p>
+      <div className="seccion-resumen">
+        <h2 className="titulo-seccion">Venta Actual</h2>
+        <div className="lista-carrito">
+          {carritoVacio ? (
+            <p className="texto-vacio">No hay productos seleccionados</p>
           ) : (
             Object.entries(carrito).map(([id, item]) => (
-              <div key={id} style={styles.itemCarrito}>
+              <div key={id} className="item-carrito">
                 <span>
                   {item.nombre} {item.cantidad > 0 && `(x${item.cantidad})`}
                 </span>
@@ -490,32 +506,30 @@ export default function App() {
           )}
         </div>
 
-        <div style={styles.pieResumen}>
-          <div style={styles.contenedorTotal}>
+        <div className="pie-resumen">
+          <div className="contenedor-total">
             <span>TOTAL:</span>
-            <span style={styles.montoTotal}>${totalGeneral}</span>
+            <span className="monto-total">${totalGeneral}</span>
           </div>
 
-          <div style={styles.contenedorBotones}>
+          <div className="contenedor-botones">
             <button
               onClick={() => {
-                if (Object.keys(carrito).length > 0) setConfirmarVaciarCarrito(true);
+                if (!carritoVacio) setConfirmarVaciarCarrito(true);
               }}
+              className="btn-accion btn-borrar"
               style={{
-                ...styles.btnAccion,
-                ...styles.btnBorrar,
-                opacity: Object.keys(carrito).length === 0 ? 0.5 : 1,
-                cursor:
-                  Object.keys(carrito).length === 0 ? "not-allowed" : "pointer",
+                opacity: carritoVacio ? 0.5 : 1,
+                cursor: carritoVacio ? "not-allowed" : "pointer",
               }}
-              disabled={Object.keys(carrito).length === 0}
+              disabled={carritoVacio}
             >
               BORRAR
             </button>
 
             <button
-              onClick={finalizarVenta}
-              style={{ ...styles.btnAccion, ...styles.btnCobrar }}
+              onClick={() => setConfirmarCompra(true)}
+              className="btn-accion btn-cobrar"
             >
               COBRAR
             </button>
@@ -551,242 +565,20 @@ export default function App() {
         onConfirmar={ejecutarVaciarCarrito}
         onCancelar={() => setConfirmarVaciarCarrito(false)}
       />
+
+      {/* MODAL 4: Confirmar Compra */}
+      <ModalConfirmacion
+        isOpen={confirmarCompra}
+        titulo="Confirmar Venta"
+        mensaje={`¿Deseas registrar el cobro por un total de $${totalGeneral}?`}
+        textoConfirmar="Cobrar"
+        colorBoton="btn-success"
+        onConfirmar={() => {
+          setConfirmarCompra(false);
+          ejecutarVaciarCarrito();
+        }}
+        onCancelar={() => setConfirmarCompra(false)}
+      />
     </div>
   );
 }
-
-const styles = {
-  pantallaPrincipal: {
-    display: "flex",
-    height: "100vh",
-    fontFamily: "Arial, sans-serif",
-    backgroundColor: "#f4f4f9",
-  },
-  seccionProductos: { flex: 2, padding: "20px", overflowY: "auto" },
-  seccionAccionRapida: {
-    flex: 1.2,
-    padding: "20px",
-    backgroundColor: "#fff",
-    borderLeft: "2px solid #ddd",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  },
-  seccionResumen: {
-    flex: 1.2,
-    padding: "20px",
-    backgroundColor: "#fff",
-    borderLeft: "2px solid #ddd",
-    display: "flex",
-    flexDirection: "column",
-  },
-  tituloSeccion: {
-    fontSize: "20px",
-    marginBottom: "20px",
-    color: "#333",
-    borderBottom: "2px solid #ddd",
-    paddingBottom: "10px",
-    width: "100%",
-  },
-  grilla: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))",
-    gap: "15px",
-  },
-  card: {
-    backgroundColor: "#fff",
-    border: "1px solid #ccc",
-    borderRadius: "8px",
-    padding: "15px",
-    display: "flex",
-    flexDirection: "column",
-    gap: "10px",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-  },
-  encabezadoCard: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  nombreProductoClickable: {
-    fontWeight: "bold",
-    fontSize: "15px",
-    cursor: "pointer",
-    color: "#0288d1",
-    userSelect: "none",
-    flex: 1,
-  },
-  inputPrecio: {
-    width: "60px",
-    padding: "3px 5px",
-    textAlign: "right",
-    borderRadius: "4px",
-    border: "1px solid #bbb",
-    fontSize: "13px",
-  },
-  inputPrecioVariedad: {
-    width: "55px",
-    padding: "2px 4px",
-    textAlign: "right",
-    borderRadius: "4px",
-    border: "1px solid #0288d1",
-    fontSize: "12px",
-    fontWeight: "bold",
-  },
-  desgloseVariedades: {
-    borderTop: "1px dashed #ccc",
-    paddingTop: "10px",
-    display: "flex",
-    flexDirection: "column",
-    gap: "8px",
-  },
-  listaVariedades: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "5px",
-    maxHeight: "140px",
-    overflowY: "auto",
-  },
-  itemVariedad: {
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-    padding: "6px",
-    borderRadius: "6px",
-    cursor: "pointer",
-  },
-  miniImg: {
-    width: "32px",
-    height: "32px",
-    borderRadius: "4px",
-    objectFit: "cover",
-  },
-  textoVariedad: { fontSize: "13px", fontWeight: "500", flex: 1 },
-  formNuevaVariedad: { display: "flex", gap: "5px" },
-  inputNuevaVariedad: {
-    flex: 1,
-    padding: "4px 8px",
-    fontSize: "12px",
-    border: "1px solid #ccc",
-    borderRadius: "4px",
-  },
-  btnAgregarVariedad: {
-    padding: "4px 10px",
-    backgroundColor: "#0288d1",
-    color: "#fff",
-    border: "none",
-    borderRadius: "4px",
-    cursor: "pointer",
-    fontWeight: "bold",
-  },
-  contenedorMultiplos: { display: "flex", gap: "5px" },
-  btnMultiplo: {
-    flex: 1,
-    padding: "10px 5px",
-    backgroundColor: "#f0f0f0",
-    border: "1px solid #ccc",
-    borderRadius: "4px",
-    cursor: "pointer",
-    fontWeight: "bold",
-    fontSize: "14px",
-  },
-  btnAgregarUnidad: {
-    width: "100%",
-    padding: "10px",
-    backgroundColor: "#e1f5fe",
-    color: "#0288d1",
-    border: "1px solid #b3e5fc",
-    borderRadius: "4px",
-    cursor: "pointer",
-    fontWeight: "bold",
-  },
-  btnCamara: {
-    padding: "10px 15px",
-    backgroundColor: "#0288d1",
-    color: "#fff",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontWeight: "bold",
-    marginBottom: "15px",
-  },
-  contenedorTarget: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: "10px",
-    width: "100%",
-  },
-  subtituloClick: {
-    fontSize: "13px",
-    color: "#2e7d32",
-    fontWeight: "bold",
-    margin: 0,
-  },
-  cardImagenGrande: {
-    position: "relative",
-    width: "200px",
-    height: "180px",
-    borderRadius: "12px",
-    overflow: "hidden",
-    cursor: "pointer",
-    border: "3px solid #0288d1",
-    boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
-  },
-  imagenGrande: { width: "100%", height: "100%", objectFit: "cover" },
-  badgePrecio: {
-    position: "absolute",
-    bottom: "8px",
-    right: "8px",
-    backgroundColor: "rgba(0,0,0,0.75)",
-    color: "#fff",
-    padding: "4px 8px",
-    borderRadius: "6px",
-    fontSize: "12px",
-    fontWeight: "bold",
-  },
-  nombreSeleccionado: {
-    fontSize: "18px",
-    margin: "5px 0 0 0",
-    textAlign: "center",
-  },
-  tagCategoria: {
-    fontSize: "12px",
-    color: "#666",
-    backgroundColor: "#f0f0f0",
-    padding: "2px 8px",
-    borderRadius: "10px",
-  },
-  listaCarrito: { flex: 1, overflowY: "auto" },
-  textoVacio: {
-    color: "#888",
-    textAlign: "center",
-    marginTop: "20px",
-    fontSize: "14px",
-  },
-  itemCarrito: {
-    display: "flex",
-    justifyContent: "space-between",
-    padding: "10px 0",
-    borderBottom: "1px solid #eee",
-  },
-  pieResumen: { borderTop: "2px solid #ddd", paddingTop: "15px" },
-  contenedorTotal: {
-    display: "flex",
-    justifyContent: "space-between",
-    fontSize: "22px",
-    fontWeight: "bold",
-    marginBottom: "15px",
-  },
-  montoTotal: { color: "#2e7d32" },
-  contenedorBotones: { display: "flex", gap: "10px" },
-  btnAccion: {
-    padding: "15px",
-    border: "none",
-    borderRadius: "6px",
-    fontSize: "16px",
-    fontWeight: "bold",
-    cursor: "pointer",
-  },
-  btnBorrar: { flex: 1, backgroundColor: "#d32f2f", color: "#fff" },
-  btnCobrar: { flex: 2, backgroundColor: "#2e7d32", color: "#fff" },
-};
