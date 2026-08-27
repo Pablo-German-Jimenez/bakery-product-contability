@@ -1,16 +1,54 @@
-# React + Vite
+# 🥐 Bakery Point of Sale (POS) & Catalog Manager
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplicación web interactiva desarrollada en **React** y **Vite** diseñada para agilizar el punto de venta, la gestión dinámica de catálogo y el registro diario de caja en panaderías y comercios minoristas.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🚀 Características Principales
 
-## React Compiler
+* **Venta Rápida Multimodal:**
+  * Cobro por **unidades fijas** (facturas, tortillas, chipá).
+  * Cobro por **fracción de dinero/peso** con botones de acceso rápido (+$50, +$100, +$500) para productos como pan.
+  * **Carga por imagen:** Suma unidades directamente haciendo clic en la fotografía de la variedad seleccionada.
+* **Gestión Dinámica de Catálogo:**
+  * Modificación de precios base y precios por subvariedad en tiempo real.
+  * Creación y eliminación de productos mediante modales de confirmación.
+  * Agregado dinámico de variedades personalizadas.
+  * Carga y captura de fotos locales en vivo para cada variedad.
+* **Caja y Control del Día:**
+  * Registro de transacciones con marca temporal (timestamp) y detalle de ítems.
+  * Panel desplegable para consultar el total acumulado de ventas del día.
+  * Opción de reinicio de caja diaria.
+* **Persistencia Local:**
+  * Sincronización automática de catálogo y ventas en `localStorage`.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 🛠️ Tecnologías Utilizadas
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+* **React 18 / 19** (Hooks: `useState`, `useEffect`)
+* **Vite** (Build tool y entorno de desarrollo)
+* **Bootstrap 5** (Componentes base y utilidades de layout)
+* **CSS3 Puro** (Arquitectura modular en clases kebab-case)
+
+---
+
+## 📁 Estructura del Proyecto
+
+```text
+panaderia-front/
+├── public/                     # Recursos estáticos e imágenes base (.png, .svg)
+├── src/
+│   ├── components/
+│   │   ├── styles/
+│   │   │   └── PanelStyles.css # Estilos globales y clases del panel
+│   │   ├── HistorialVentas.jsx # Componente de auditoría y total del día
+│   │   ├── ModalAviso.jsx
+│   │   ├── ModalConfirmacion.jsx
+│   │   ├── ModalNuevoProducto.jsx
+│   │   └── ProductsCard.jsx
+│   ├── App.jsx                 # Componente principal / Lógica de estado
+│   ├── index.css
+│   └── main.jsx
+├── package.json
+└── vite.config.js
