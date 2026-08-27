@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import ModalNuevoProducto from "./components/ModalNuevoProducto.jsx";
 import ModalConfirmacion from "./components/ModalConfirmacion.jsx";
-import './components/styles/PanelStyles.css';
+import HistorialVentas from "./components/HistorialVentas.jsx";
+import "./components/styles/PanelStyles.css";
 
 const PRODUCTOS_INICIALES = [
   {
@@ -24,10 +25,15 @@ const PRODUCTOS_INICIALES = [
       },
       {
         id: "f3",
-        nombre: "Con dulce de leche",
-        precio: 500,
-        img: "/conDulceDeLeche.png"
-        ,
+        nombre: "Con Dulce de Leche",
+        precio: 450,
+        img: "/conDulceDeLeche.png",
+      },
+      {
+        id: "f4",
+        nombre: "Sacramento",
+        precio: 450,
+        img: "/sacramentos.png",
       },
     ],
   },
@@ -41,31 +47,31 @@ const PRODUCTOS_INICIALES = [
         id: "t1",
         nombre: "Tortilla Finita",
         precio: 150,
-        img: "/tortillasFinitas.png",
+        img: "tortillasFinitas.png",
       },
       {
         id: "t2",
         nombre: "Tortilla Gruesa",
         precio: 200,
-        img: "/tortillasGruesas.png",
+        img: "tortillasGruesas.png",
       },
       {
         id: "t3",
         nombre: "Bollitos",
         precio: 120,
-        img: "/bollitos.png",
+        img: "bollitos.png",
       },
-      {
+       {
         id: "t4",
         nombre: "Cremonas",
         precio: 120,
-        img: "/cremonas.png",
+        img: "cremonas.png",
       },
       {
-        id: "t5",
+        id: "t4",
         nombre: "Cuernitos",
         precio: 120,
-        img: "/cuernitos.png",
+        img: "cuernitos.png",
       },
     ],
   },
@@ -74,24 +80,24 @@ const PRODUCTOS_INICIALES = [
     nombre: "Pan",
     precio: 3000,
     tipo: "dinero",
-      variedades: [
+    variedades: [
       {
         id: "p1",
         nombre: "Pan Francés",
         precio: 3000,
-        img: "/panFrances.png",
+        img: "panFrances.png",
       },
       {
         id: "p2",
         nombre: "Pan Mignon",
         precio: 3200,
-        img: "/panMignon.png",
+        img: "panMignon.png",
       },
       {
         id: "p3",
         nombre: "Pan Sanguchero",
         precio: 3000,
-        img: "/panFrances.png",
+        img: "panFrances.png",
       },
     ],
   },
@@ -110,9 +116,21 @@ export default function App() {
     return guardados ? JSON.parse(guardados) : PRODUCTOS_INICIALES;
   });
 
+  // Ventas del día en localStorage
+  const [ventasDia, setVentasDia] = useState(() => {
+    const ventasGuardadas = localStorage.getItem("ventas_panaderia_dia");
+    return ventasGuardadas ? JSON.parse(ventasGuardadas) : [];
+  });
+
+  const [mostrarHistorial, setMostrarHistorial] = useState(false);
+
   useEffect(() => {
     localStorage.setItem("catalogo_panaderia", JSON.stringify(productos));
   }, [productos]);
+
+  useEffect(() => {
+    localStorage.setItem("ventas_panaderia_dia", JSON.stringify(ventasDia));
+  }, [ventasDia]);
 
   // Estados de la app
   const [carrito, setCarrito] = useState({});
@@ -120,18 +138,16 @@ export default function App() {
   const [variedadSeleccionada, setVariedadSeleccionada] = useState(null);
   const [nuevaVariedadNombre, setNuevaVariedadNombre] = useState("");
 
-  // Estados de Modales
+  // Modales
   const [mostrarModalNuevo, setMostrarModalNuevo] = useState(false);
   const [productoAEliminar, setProductoAEliminar] = useState(null);
   const [confirmarVaciarCarrito, setConfirmarVaciarCarrito] = useState(false);
   const [confirmarCompra, setConfirmarCompra] = useState(false);
 
-  // Agregar producto desde el modal
   const handleAgregarProducto = (nuevoProducto) => {
     setProductos([...productos, nuevoProducto]);
   };
 
-  // Confirmar eliminación del producto
   const confirmarEliminacionProducto = () => {
     if (!productoAEliminar) return;
 
@@ -228,6 +244,26 @@ export default function App() {
     setConfirmarVaciarCarrito(false);
   };
 
+  // Registrar cobro y persistir en el historial
+  const registrarCobro = () => {
+    const nuevaVenta = {
+      id: Date.now().toString(),
+      hora: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      items: Object.values(carrito),
+      total: totalGeneral,
+    };
+
+    setVentasDia((prev) => [nuevaVenta, ...prev]);
+    setCarrito({});
+    setConfirmarCompra(false);
+  };
+
+  const limpiarHistorialDia = () => {
+    if (window.confirm("¿Seguro que deseas reiniciar el total del día a 0?")) {
+      setVentasDia([]);
+    }
+  };
+
   const tomarFotoParaVariedad = (e) => {
     const file = e.target.files[0];
     if (!file || !variedadSeleccionada) return;
@@ -269,18 +305,32 @@ export default function App() {
       <div className="seccion-productos">
         <h2 className="titulo-seccion">Productos</h2>
 
-        {/* Botón que abre el Modal de Creación */}
-        <div className="card mb-3 shadow-sm border-info">
-          <div className="card-body py-2">
-            <button
-              type="button"
-              onClick={() => setMostrarModalNuevo(true)}
-              className="btn btn-info w-100 fw-bold text-white"
-            >
-              ➕ Agregar Producto
-            </button>
-          </div>
+        {/* Botonera Superior */}
+        <div className="d-flex gap-2 mb-3">
+          <button
+            type="button"
+            onClick={() => setMostrarModalNuevo(true)}
+            className="btn btn-info flex-grow-1 fw-bold text-white"
+          >
+            ➕ Agregar Producto
+          </button>
+          <button
+            type="button"
+            onClick={() => setMostrarHistorial(!mostrarHistorial)}
+            className={`btn fw-bold ${mostrarHistorial ? "btn-secondary" : "btn-outline-success"}`}
+          >
+            {mostrarHistorial ? "Ocultar Caja" : "📊 Consultar total del día"}
+          </button>
         </div>
+
+        {/* Card de Historial Renderizada */}
+        {mostrarHistorial && (
+          <HistorialVentas
+            ventas={ventasDia}
+            onCerrar={() => setMostrarHistorial(false)}
+            onLimpiarHistorial={limpiarHistorialDia}
+          />
+        )}
 
         {/* Grilla de Cards */}
         <div className="grilla">
@@ -530,6 +580,11 @@ export default function App() {
             <button
               onClick={() => setConfirmarCompra(true)}
               className="btn-accion btn-cobrar"
+              style={{
+                opacity: carritoVacio ? 0.5 : 1,
+                cursor: carritoVacio ? "not-allowed" : "pointer",
+              }}
+              disabled={carritoVacio}
             >
               COBRAR
             </button>
@@ -544,7 +599,7 @@ export default function App() {
         onAgregarProducto={handleAgregarProducto}
       />
 
-      {/* MODAL 2: Confirmar Eliminación de Producto */}
+      {/* MODAL 2: Confirmar Eliminación */}
       <ModalConfirmacion
         isOpen={!!productoAEliminar}
         titulo="Eliminar Producto"
@@ -566,17 +621,14 @@ export default function App() {
         onCancelar={() => setConfirmarVaciarCarrito(false)}
       />
 
-      {/* MODAL 4: Confirmar Compra */}
+      {/* MODAL 4: Confirmar Cobro y Registro en Caja */}
       <ModalConfirmacion
         isOpen={confirmarCompra}
         titulo="Confirmar Venta"
         mensaje={`¿Deseas registrar el cobro por un total de $${totalGeneral}?`}
         textoConfirmar="Cobrar"
         colorBoton="btn-success"
-        onConfirmar={() => {
-          setConfirmarCompra(false);
-          ejecutarVaciarCarrito();
-        }}
+        onConfirmar={registrarCobro}
         onCancelar={() => setConfirmarCompra(false)}
       />
     </div>
