@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
+import ModalNuevoProducto from "./components/ModalNuevoProducto.jsx";
+import ModalConfirmacion from "./components/ModalConfirmacion.jsx"; // 👈 Importamos el modal de confirmación
 
-// Catálogo por defecto si no hay nada en localStorage
 const PRODUCTOS_INICIALES = [
   {
     id: "1",
@@ -84,63 +85,49 @@ const PRODUCTOS_INICIALES = [
 ];
 
 export default function App() {
-  // 1. Catálogo con lectura inicial desde localStorage
   const [productos, setProductos] = useState(() => {
     const guardados = localStorage.getItem("catalogo_panaderia");
     return guardados ? JSON.parse(guardados) : PRODUCTOS_INICIALES;
   });
 
-  // 2. Guardar en localStorage cada vez que productos cambia
   useEffect(() => {
     localStorage.setItem("catalogo_panaderia", JSON.stringify(productos));
   }, [productos]);
 
-  // Estados de interfaz y carrito
+  // Estados de la app
   const [carrito, setCarrito] = useState({});
   const [categoriaAbierta, setCategoriaAbierta] = useState(null);
   const [variedadSeleccionada, setVariedadSeleccionada] = useState(null);
   const [nuevaVariedadNombre, setNuevaVariedadNombre] = useState("");
 
-  // Agregar nuevo producto base
-  const agregarProducto = () => {
-    const nombre = prompt(
-      "Ingresá el nombre del nuevo producto:",
-      "Nuevo Producto",
-    );
-    if (!nombre || !nombre.trim()) return;
+  // Estados de Modales
+  const [mostrarModalNuevo, setMostrarModalNuevo] = useState(false);
+  const [productoAEliminar, setProductoAEliminar] = useState(null); // Guarda { id, nombre }
+  const [confirmarVaciarCarrito, setConfirmarVaciarCarrito] = useState(false);
 
-    const precioStr = prompt("Ingresá el precio inicial:", "100");
-    const precio = precioStr ? Number(precioStr) || 0 : 0;
-
-    const nuevo = {
-      id: Date.now().toString(),
-      nombre: nombre.trim(),
-      precio: precio,
-      tipo: "unidad",
-     
-    };
-    console.log(nuevo.id)
-    setProductos([...productos, nuevo]);
+  // Agregar producto desde el modal
+  const handleAgregarProducto = (nuevoProducto) => {
+    setProductos([...productos, nuevoProducto]);
   };
 
-  // Eliminar un producto
-  const eliminarProducto = (id, nombre) => {
-    if (window.confirm(`¿Querés eliminar "${nombre}" del catálogo?`)) {
-      setProductos(productos.filter((p) => p.id !== id));
-      if (categoriaAbierta === id) setCategoriaAbierta(null);
-      if (variedadSeleccionada?.producto?.id === id)
-        setVariedadSeleccionada(null);
+  // Confirmar eliminación del producto
+  const confirmarEliminacionProducto = () => {
+    if (!productoAEliminar) return;
+
+    setProductos(productos.filter((p) => p.id !== productoAEliminar.id));
+    if (categoriaAbierta === productoAEliminar.id) setCategoriaAbierta(null);
+    if (variedadSeleccionada?.producto?.id === productoAEliminar.id) {
+      setVariedadSeleccionada(null);
     }
+    setProductoAEliminar(null);
   };
 
-  // Modificar precio base del producto
   const cambiarPrecioProducto = (id, nuevoPrecio) => {
     setProductos(
-      productos.map((p) => (p.id === id ? { ...p, precio: nuevoPrecio } : p)),
+      productos.map((p) => (p.id === id ? { ...p, precio: nuevoPrecio } : p))
     );
   };
 
-  // Modificar precio de una variedad específica
   const cambiarPrecioVariedad = (productoId, variedadId, nuevoPrecio) => {
     setProductos((prev) =>
       prev.map((prod) => {
@@ -148,12 +135,12 @@ export default function App() {
           return {
             ...prod,
             variedades: prod.variedades.map((v) =>
-              v.id === variedadId ? { ...v, precio: nuevoPrecio } : v,
+              v.id === variedadId ? { ...v, precio: nuevoPrecio } : v
             ),
           };
         }
         return prod;
-      }),
+      })
     );
 
     if (variedadSeleccionada && variedadSeleccionada.id === variedadId) {
@@ -164,7 +151,6 @@ export default function App() {
     }
   };
 
-  // Agregar variedad a una categoría
   const agregarNuevaVariedad = (productoId) => {
     if (!nuevaVariedadNombre.trim()) return;
 
@@ -182,13 +168,12 @@ export default function App() {
           return { ...prod, variedades: [...(prod.variedades || []), nueva] };
         }
         return prod;
-      }),
+      })
     );
 
     setNuevaVariedadNombre("");
   };
 
-  // Agregar al carrito
   const agregarAlCarrito = (producto, montoEnPesos, nombreDetalle = null) => {
     const key = nombreDetalle ? `${producto.id}_${nombreDetalle}` : producto.id;
     const itemLabel = nombreDetalle
@@ -214,18 +199,12 @@ export default function App() {
 
   const totalGeneral = Object.values(carrito).reduce(
     (acc, item) => acc + item.totalItem,
-    0,
+    0
   );
 
-  const vaciarCarrito = () => {
-    if (Object.keys(carrito).length === 0) return;
-    if (
-      window.confirm(
-        "¿Estás seguro de que querés borrar todo el pedido actual?",
-      )
-    ) {
-      setCarrito({});
-    }
+  const ejecutarVaciarCarrito = () => {
+    setCarrito({});
+    setConfirmarVaciarCarrito(false);
   };
 
   const finalizarVenta = () => {
@@ -255,12 +234,12 @@ export default function App() {
               variedades: prod.variedades.map((v) =>
                 v.id === variedadSeleccionada.id
                   ? { ...v, img: nuevaImagenUrl }
-                  : v,
+                  : v
               ),
             };
           }
           return prod;
-        }),
+        })
       );
     };
 
@@ -273,12 +252,12 @@ export default function App() {
       <div style={styles.seccionProductos}>
         <h2 style={styles.tituloSeccion}>Productos</h2>
 
-        {/* Card Bootstrap con botón para agregar */}
+        {/* Botón que abre el Modal de Creación */}
         <div className="card mb-3 shadow-sm border-info">
           <div className="card-body py-2">
             <button
               type="button"
-              onClick={agregarProducto}
+              onClick={() => setMostrarModalNuevo(true)}
               className="btn btn-info w-100 fw-bold text-white"
             >
               ➕ Agregar Producto
@@ -293,7 +272,6 @@ export default function App() {
 
             return (
               <div key={producto.id} style={styles.card}>
-                {/* Encabezado con Nombre, Precio y Botón Eliminar */}
                 <div style={styles.encabezadoCard}>
                   <span
                     onClick={() => {
@@ -311,17 +289,18 @@ export default function App() {
                       type="number"
                       value={producto.precio}
                       onChange={(e) =>
-                        cambiarPrecioProducto(
-                          producto.id,
-                          Number(e.target.value),
-                        )
+                        cambiarPrecioProducto(producto.id, Number(e.target.value))
                       }
                       style={styles.inputPrecio}
                       title="Editar precio base"
                     />
+                    {/* Botón para abrir modal de confirmación de eliminación */}
                     <button
                       onClick={() =>
-                        eliminarProducto(producto.id, producto.nombre)
+                        setProductoAEliminar({
+                          id: producto.id,
+                          nombre: producto.nombre,
+                        })
                       }
                       className="btn btn-outline-danger btn-sm p-0 px-2 ms-1"
                       title="Eliminar producto"
@@ -339,8 +318,7 @@ export default function App() {
                       {producto.variedades &&
                         producto.variedades.map((v) => {
                           const precioVariedad = v.precio ?? producto.precio;
-                          const esSeleccionada =
-                            variedadSeleccionada?.id === v.id;
+                          const esSeleccionada = variedadSeleccionada?.id === v.id;
 
                           return (
                             <div
@@ -354,33 +332,20 @@ export default function App() {
                               }
                               style={{
                                 ...styles.itemVariedad,
-                                backgroundColor: esSeleccionada
-                                  ? "#e0f2fe"
-                                  : "#fff",
+                                backgroundColor: esSeleccionada ? "#e0f2fe" : "#fff",
                                 border: esSeleccionada
                                   ? "1px solid #0288d1"
                                   : "1px solid #e0e0e0",
                               }}
                             >
-                              <img
-                                src={v.img}
-                                alt={v.nombre}
-                                style={styles.miniImg}
-                              />
-                              <span style={styles.textoVariedad}>
-                                {v.nombre}
-                              </span>
+                              <img src={v.img} alt={v.nombre} style={styles.miniImg} />
+                              <span style={styles.textoVariedad}>{v.nombre}</span>
 
-                              {/* Input precio individual para cada variedad */}
                               <div
                                 className="ms-auto d-flex align-items-center gap-1"
                                 onClick={(e) => e.stopPropagation()}
                               >
-                                <span
-                                  style={{ fontSize: "11px", color: "#666" }}
-                                >
-                                  $
-                                </span>
+                                <span style={{ fontSize: "11px", color: "#666" }}>$</span>
                                 <input
                                   type="number"
                                   value={precioVariedad}
@@ -388,7 +353,7 @@ export default function App() {
                                     cambiarPrecioVariedad(
                                       producto.id,
                                       v.id,
-                                      Number(e.target.value),
+                                      Number(e.target.value)
                                     )
                                   }
                                   style={styles.inputPrecioVariedad}
@@ -400,7 +365,6 @@ export default function App() {
                         })}
                     </div>
 
-                    {/* Input para agregar variedad al vuelo */}
                     <div style={styles.formNuevaVariedad}>
                       <input
                         type="text"
@@ -419,7 +383,7 @@ export default function App() {
                   </div>
                 )}
 
-                {/* Botonera de compra rápida base */}
+                {/* Botonera de compra rápida */}
                 {producto.tipo === "dinero" ? (
                   <div style={styles.contenedorMultiplos}>
                     <button
@@ -480,7 +444,7 @@ export default function App() {
                 agregarAlCarrito(
                   variedadSeleccionada.producto,
                   variedadSeleccionada.precio,
-                  variedadSeleccionada.nombre,
+                  variedadSeleccionada.nombre
                 )
               }
               style={styles.cardImagenGrande}
@@ -534,7 +498,9 @@ export default function App() {
 
           <div style={styles.contenedorBotones}>
             <button
-              onClick={vaciarCarrito}
+              onClick={() => {
+                if (Object.keys(carrito).length > 0) setConfirmarVaciarCarrito(true);
+              }}
               style={{
                 ...styles.btnAccion,
                 ...styles.btnBorrar,
@@ -556,6 +522,35 @@ export default function App() {
           </div>
         </div>
       </div>
+
+      {/* MODAL 1: Crear Nuevo Producto */}
+      <ModalNuevoProducto
+        isOpen={mostrarModalNuevo}
+        onClose={() => setMostrarModalNuevo(false)}
+        onAgregarProducto={handleAgregarProducto}
+      />
+
+      {/* MODAL 2: Confirmar Eliminación de Producto */}
+      <ModalConfirmacion
+        isOpen={!!productoAEliminar}
+        titulo="Eliminar Producto"
+        mensaje={`¿Estás seguro de que querés eliminar "${productoAEliminar?.nombre}" del catálogo?`}
+        textoConfirmar="Eliminar"
+        colorBoton="btn-danger"
+        onConfirmar={confirmarEliminacionProducto}
+        onCancelar={() => setProductoAEliminar(null)}
+      />
+
+      {/* MODAL 3: Confirmar Borrado de Carrito */}
+      <ModalConfirmacion
+        isOpen={confirmarVaciarCarrito}
+        titulo="Vaciar Carrito"
+        mensaje="¿Estás seguro de que querés borrar todo el pedido actual?"
+        textoConfirmar="Vaciar"
+        colorBoton="btn-danger"
+        onConfirmar={ejecutarVaciarCarrito}
+        onCancelar={() => setConfirmarVaciarCarrito(false)}
+      />
     </div>
   );
 }
