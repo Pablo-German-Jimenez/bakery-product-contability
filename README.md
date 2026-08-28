@@ -1,3 +1,5 @@
+Deploy proyecto! https://bakery-accounting-book.netlify.app/
+
 # 🥐 Bakery Point of Sale (POS) & Catalog Manager
 
 Aplicación web interactiva desarrollada en **React** y **Vite** diseñada para agilizar el punto de venta, la gestión dinámica de catálogo y el registro diario de caja en panaderías y comercios minoristas.
