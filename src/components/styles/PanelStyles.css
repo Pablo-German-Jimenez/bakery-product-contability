@@ -1,14 +1,13 @@
 /* src/components/styles/PanelStyles.css */
 
 .pantalla-principal {
-  display: flex;
+  display:flex;
   height: 100vh;
   font-family: Arial, sans-serif;
   background-color: #f4f4f9;
 }
 
 .seccion-productos {
-  flex: 2;
   padding: 20px;
   overflow-y: auto;
 }

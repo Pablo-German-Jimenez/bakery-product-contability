@@ -300,13 +300,14 @@ export default function App() {
   const carritoVacio = Object.keys(carrito).length === 0;
 
   return (
-    <div className="pantalla-principal">
+    <div className="container-fluid py-3">
+ <div className="pantalla-principal row g-3">
       {/* SECCIÓN IZQUIERDA: PRODUCTOS */}
       <div className="seccion-productos">
         <h2 className="titulo-seccion">Productos</h2>
 
         {/* Botonera Superior */}
-        <div className="d-flex gap-2 mb-3">
+        <div className="gap-2 mb-3">
           <button
             type="button"
             onClick={() => setMostrarModalNuevo(true)}
@@ -632,5 +633,7 @@ export default function App() {
         onCancelar={() => setConfirmarCompra(false)}
       />
     </div>
+    </div>
+   
   );
 }
