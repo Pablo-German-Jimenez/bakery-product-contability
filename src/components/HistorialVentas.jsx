@@ -1,6 +1,3 @@
-// src/components/HistorialVentas.jsx
-import React from "react";
-
 export default function HistorialVentas({ ventas, onCerrar, onLimpiarHistorial }) {
   const totalHistorico = ventas.reduce((acc, v) => acc + v.total, 0);
 

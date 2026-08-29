@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import ModalNuevoProducto from "./components/ModalNuevoProducto.jsx";
 import ModalConfirmacion from "./components/ModalConfirmacion.jsx";
 import HistorialVentas from "./components/HistorialVentas.jsx";
